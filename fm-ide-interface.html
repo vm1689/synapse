@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FM IDE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #e4e4e7;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .ide-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: #1e1e1e;
+            border-bottom: 1px solid #3e3e42;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header h1 {
+            font-size: 14px;
+            color: #e4e4e7;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .panels-container {
+            display: flex;
+            flex: 1;
+            background: #3e3e42;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            min-width: 50px;
+            transition: flex 0.3s ease;
+        }
+
+        .panel.collapsed {
+            flex: 0 0 40px !important;
+            min-width: 40px;
+        }
+
+        .panel.collapsed .panel-content {
+            display: none;
+        }
+
+        .panel.collapsed .panel-header {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            padding: 16px 8px;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .panel-header {
+            background: #1e1e1e;
+            padding: 10px 12px;
+            border-bottom: 1px solid #3e3e42;
+            font-size: 11px;
+            color: #a1a1aa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            flex: 1;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            color: #71717a;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 12px;
+            transition: color 0.2s;
+        }
+
+        .collapse-btn:hover {
+            color: #e4e4e7;
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.6;
+            background: #1e1e1e;
+        }
+
+        .resize-handle {
+            width: 8px;
+            background: #3e3e42;
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .resize-handle:hover {
+            background: #4e4e52;
+        }
+
+        .resize-handle.dragging {
+            background: #5e5e62;
+        }
+
+        /* Chat Panel Styles */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: #1e1e1e;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            padding: 8px 10px;
+            background: #2d2d30;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .chat-message:hover {
+            background: #333337;
+        }
+
+        .chat-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #424245;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            flex-shrink: 0;
+            color: #ffffff;
+        }
+
+        .chat-avatar.user {
+            background: #6264a7;
+        }
+
+        .chat-avatar.medical {
+            background: #8b5cf6;
+        }
+
+        .chat-avatar.technical {
+            background: #0078d4;
+        }
+
+        .chat-message-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .chat-message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .chat-username {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .chat-mention {
+            color: #5b9bd5;
+            cursor: pointer;
+        }
+
+        .chat-mention:hover {
+            text-decoration: underline;
+        }
+
+        .chat-timestamp {
+            font-size: 12px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+
+        .chat-message-text {
+            font-size: 14px;
+            color: #e4e4e7;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .chat-message-text strong {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .chat-message-text a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .chat-message-text a:hover {
+            text-decoration: underline;
+        }
+
+        .chat-reactions {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .chat-reaction {
+            background: #3e3e42;
+            border: 1px solid #4e4e52;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-reaction:hover {
+            background: #4e4e52;
+            border-color: #5e5e62;
+        }
+
+        .chat-reaction-count {
+            color: #e4e4e7;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .chat-input-container {
+            background: #2d2d30;
+            border-top: 1px solid #3e3e42;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .model-selector {
+            background: #3e3e42;
+            border: 1px solid #4e4e52;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #ffffff;
+            width: 100%;
+            font-size: 10px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .model-selector:hover {
+            background: #4e4e52;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 8px 12px;
+        }
+
+        .chat-input {
+            background: transparent;
+            border: none;
+            color: #242424;
+            padding: 0;
+            width: 100%;
+            font-size: 10px;
+            outline: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            resize: none;
+            min-height: 24px;
+            max-height: 120px;
+        }
+
+        .chat-input::placeholder {
+            color: #616161;
+        }
+
+        .chat-send-btn {
+            background: transparent;
+            border: none;
+            color: #0078d4;
+            padding: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .chat-send-btn:hover {
+            color: #106ebe;
+        }
+
+        .chat-send-btn:disabled {
+            color: #a0a0a0;
+            cursor: not-allowed;
+        }
+
+        /* Plan Panel Styles */
+        .plan-item {
+            color: #a1a1aa;
+            margin-bottom: 20px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .plan-item::before {
+            content: '#';
+            position: absolute;
+            left: 0;
+            color: #52525b;
+        }
+
+        .plan-title {
+            color: #c084fc;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .plan-detail {
+            color: #71717a;
+            margin-left: 16px;
+            margin-top: 4px;
+            font-size: 11px;
+        }
+
+        .plan-value {
+            color: #86efac;
+            font-weight: 500;
+        }
+
+        .plan-citation {
+            color: #3b82f6;
+            font-size: 9px;
+            vertical-align: super;
+            cursor: pointer;
+            margin-left: 2px;
+        }
+
+        .plan-citation:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        .plan-citations-section {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .plan-citation-item {
+            color: #71717a;
+            font-size: 9px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .plan-citation-item a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .plan-citation-item a:hover {
+            text-decoration: underline;
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .plan-action-btn {
+            background: #3e3e42;
+            border: 1px solid #4e4e52;
+            border-radius: 4px;
+            color: #e4e4e7;
+            padding: 6px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .plan-action-btn:hover {
+            background: #4e4e52;
+            border-color: #5e5e62;
+        }
+
+        .plan-action-btn:active {
+            background: #5e5e62;
+        }
+
+        .plan-action-btn.primary {
+            background: #0078d4;
+            border-color: #0078d4;
+        }
+
+        .plan-action-btn.primary:hover {
+            background: #106ebe;
+            border-color: #106ebe;
+        }
+
+        .plan-action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Code Panel Styles */
+        .code-content {
+            font-family: 'SF Mono', Monaco, Consolas, monospace;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .comment {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .keyword {
+            color: #c084fc;
+            font-weight: 500;
+        }
+
+        .class-name {
+            color: #67e8f9;
+        }
+
+        .function-name {
+            color: #fbbf24;
+        }
+
+        .string {
+            color: #86efac;
+        }
+
+        .number {
+            color: #fca5a5;
+        }
+
+        .operator {
+            color: #f472b6;
+        }
+
+        .variable {
+            color: #fde047;
+        }
+
+        .code-line {
+            margin: 2px 0;
+            white-space: pre;
+        }
+
+        /* Model Panel Styles */
+        .model-chart {
+            margin-top: 20px;
+        }
+
+        .chart-title {
+            color: #a1a1aa;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 200px;
+        }
+
+        .axis-label {
+            fill: #71717a;
+            font-size: 9px;
+        }
+
+        .chart-line {
+            stroke: #22d3ee;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .grid-line {
+            stroke: #3e3e42;
+            stroke-width: 1;
+        }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #424245;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4e4e52;
+        }
+
+        .indent-1 { margin-left: 20px; }
+        .indent-2 { margin-left: 40px; }
+
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ide-container">
+        <div class="header">
+            <h1>FM IDE</h1>
+        </div>
+        
+        <div class="panels-container" id="panelsContainer">
+            <!-- Chat Panel -->
+            <div class="panel" style="flex: 1;" data-panel="chat">
+                <div class="panel-header">
+                    <span class="panel-title">Chat</span>
+                    <button class="collapse-btn" onclick="togglePanel('chat')">◀</button>
+                </div>
+                <div class="panel-content" style="padding: 0; display: flex; flex-direction: column;">
+                    <div class="chat-messages">
+                        <div class="chat-message">
+                            <div class="chat-avatar user">SM</div>
+                            <div class="chat-message-content">
+                                <div class="chat-message-header">
+                                    <span class="chat-username">Sarah Martinez</span>
+                                    <span class="chat-timestamp">9:23 AM</span>
+                                </div>
+                                <div class="chat-message-text">Can we update the launch year assumption from 2027 to 2028? The Phase 3 timeline just shifted.</div>
+                                <div class="chat-reactions">
+                                    <div class="chat-reaction">
+                                        <span>👍</span>
+                                        <span class="chat-reaction-count">3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-message">
+                            <div class="chat-avatar technical">JC</div>
+                            <div class="chat-message-content">
+                                <div class="chat-message-header">
+                                    <span class="chat-username">James Chen</span>
+                                    <span class="chat-timestamp">9:25 AM</span>
+                                </div>
+                                <div class="chat-message-text">Updated in plan.md. The model recalculated automatically:
+
+<strong>Summary:</strong>
+• Launch Year: 2028 (was 2027)
+• Peak Year: 2035 → 2036
+• rNPV: $1.24B → $1.18B (-4.8%)
+• IRR: 28.3% → 26.9%
+
+The one-year delay reduces NPV by about $60M due to time value of money.</div>
+                                <div class="chat-reactions">
+                                    <div class="chat-reaction">
+                                        <span>👀</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-message">
+                            <div class="chat-avatar medical">AK</div>
+                            <div class="chat-message-content">
+                                <div class="chat-message-header">
+                                    <span class="chat-username">Aisha Kumar</span>
+                                    <span class="chat-mention">James Chen</span>
+                                    <span class="chat-timestamp">9:31 AM</span>
+                                </div>
+                                <div class="chat-message-text">Should we also adjust the probability of success? Phase 2 results came in stronger than expected - maybe bump it from 50% to 60%?
+
+Source: <a href="https://clinicaltrials.gov/study/NCT05234567" target="_blank">https://clinicaltrials.gov/study/NCT05234567</a></div>
+                            </div>
+                        </div>
+
+                        <div class="chat-message">
+                            <div class="chat-avatar user">SM</div>
+                            <div class="chat-message-content">
+                                <div class="chat-message-header">
+                                    <span class="chat-username">Sarah Martinez</span>
+                                    <span class="chat-timestamp">9:33 AM</span>
+                                </div>
+                                <div class="chat-message-text">Good point. I'm also seeing updated pricing data from the recent IQVIA report showing $285K net price for comparable therapies.
+
+Link: <a href="https://iqvia.com/rare-disease-pricing-2025" target="_blank">https://iqvia.com/rare-disease-pricing-2025</a></div>
+                                <div class="chat-reactions">
+                                    <div class="chat-reaction">
+                                        <span>👍</span>
+                                        <span class="chat-reaction-count">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-message">
+                            <div class="chat-avatar technical">JC</div>
+                            <div class="chat-message-content">
+                                <div class="chat-message-header">
+                                    <span class="chat-username">James Chen</span>
+                                    <span class="chat-timestamp">9:36 AM</span>
+                                </div>
+                                <div class="chat-message-text">Updated both assumptions. Also added the GlobalData market size estimate for reference.
+
+<a href="https://globaldata.com/alpha1-market-forecast" target="_blank">https://globaldata.com/alpha1-market-forecast</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <select class="model-selector">
+                            <option>Financial Analyst</option>
+                            <option>Market Research Specialist</option>
+                            <option>Data Scientist</option>
+                            <option>Strategy Consultant</option>
+                        </select>
+                        <div class="chat-input-wrapper">
+                            <textarea class="chat-input" placeholder="Type a message" rows="1"></textarea>
+                            <button class="chat-send-btn">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resize-handle" data-handle="0"></div>
+
+            <!-- Plan Panel -->
+            <div class="panel" style="flex: 1;" data-panel="plan">
+                <div class="panel-header">
+                    <span class="panel-title">Plan</span>
+                    <button class="collapse-btn" onclick="togglePanel('plan')">◀</button>
+                </div>
+                <div class="panel-content">
+                    <div class="plan-item">
+                        <div class="plan-title"># Drug Valuation</div>
+                        <div class="plan-detail">Asset-level financial model for rare disease therapeutic</div>
+                    </div>
+
+                    <div class="plan-actions">
+                        <button class="plan-action-btn primary" onclick="updateCodeAndModel()">
+                            <span>⚡</span>
+                            <span>Update Code & Model</span>
+                        </button>
+                    </div>
+                    
+                    <div class="plan-item">
+                        <div class="plan-title">## Commercial Assumptions</div>
+                        <div class="plan-detail">Launch Year: <span class="plan-value">2028</span></div>
+                        <div class="plan-detail">Peak Year: <span class="plan-value">2036</span></div>
+                        <div class="plan-detail">LOE Year: <span class="plan-value">2040</span></div>
+                    </div>
+                    
+                    <div class="plan-item">
+                        <div class="plan-title">## Pricing & Market</div>
+                        <div class="plan-detail">Net Price: <span class="plan-value">$285,000</span> per patient/year<span class="plan-citation">[1]</span></div>
+                        <div class="plan-detail">Price Growth: <span class="plan-value">2.5%</span> annually</div>
+                        <div class="plan-detail">Target Population: <span class="plan-value">8,500</span> patients (US)<span class="plan-citation">[2]</span></div>
+                        <div class="plan-detail">Peak Penetration: <span class="plan-value">45%</span></div>
+                    </div>
+                    
+                    <div class="plan-item">
+                        <div class="plan-title">## Development Risk</div>
+                        <div class="plan-detail">Probability of Success: <span class="plan-value">60%</span><span class="plan-citation">[3]</span></div>
+                        <div class="plan-detail">Phase 3 Start: <span class="plan-value">Q2 2026</span></div>
+                    </div>
+                    
+                    <div class="plan-item">
+                        <div class="plan-title">## Deal Economics</div>
+                        <div class="plan-detail">Partner: <span class="plan-value">BioPartner Inc.</span></div>
+                        <div class="plan-detail">Royalty Tier 1: <span class="plan-value">12%</span> (first $500M)</div>
+                        <div class="plan-detail">Royalty Tier 2: <span class="plan-value">18%</span> (above $500M)</div>
+                        <div class="plan-detail">Development Milestones: <span class="plan-value">$125M</span></div>
+                    </div>
+                    
+                    <div class="plan-item">
+                        <div class="plan-title">## Output Metrics</div>
+                        <div class="plan-detail">rNPV (10%): <span class="plan-value">$1.18B</span></div>
+                        <div class="plan-detail">IRR: <span class="plan-value">26.9%</span></div>
+                        <div class="plan-detail">Peak Revenue: <span class="plan-value">$1.09B</span></div>
+                    </div>
+
+                    <div class="plan-citations-section">
+                        <div class="plan-title">## References</div>
+                        <div class="plan-citation-item">[1] <a href="https://iqvia.com/rare-disease-pricing-2025" target="_blank">IQVIA Rare Disease Pricing Report 2025</a></div>
+                        <div class="plan-citation-item">[2] <a href="https://globaldata.com/alpha1-market-forecast" target="_blank">GlobalData Alpha-1 Antitrypsin Market Forecast</a></div>
+                        <div class="plan-citation-item">[3] <a href="https://clinicaltrials.gov/study/NCT05234567" target="_blank">ClinicalTrials.gov - Phase 2 Results (NCT05234567)</a></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resize-handle" data-handle="1"></div>
+
+            <!-- Code Panel -->
+            <div class="panel" style="flex: 1;" data-panel="code">
+                <div class="panel-header">
+                    <span class="panel-title">Code</span>
+                    <button class="collapse-btn" onclick="togglePanel('code')">◀</button>
+                </div>
+                <div class="panel-content">
+                    <div class="code-content">
+                        <div class="code-line"><span class="comment"># NPV Model - Auto-generated from plan.md</span></div>
+                        <div class="code-line"><span class="comment"># Last updated: 2025-11-22 09:35:17</span></div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div>
+                        <div class="code-line"><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass</div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="operator">@</span>dataclass</div>
+                        <div class="code-line"><span class="keyword">class</span> <span class="class-name">NPVModel</span>:</div>
+                        <div class="code-line indent-1"><span class="comment"># Commercial Assumptions</span></div>
+                        <div class="code-line indent-1">launch_year: <span class="class-name">int</span> <span class="operator">=</span> <span class="number">2028</span></div>
+                        <div class="code-line indent-1">peak_year: <span class="class-name">int</span> <span class="operator">=</span> <span class="number">2036</span></div>
+                        <div class="code-line indent-1">loe_year: <span class="class-name">int</span> <span class="operator">=</span> <span class="number">2040</span></div>
+                        <div class="code-line indent-1"></div>
+                        <div class="code-line indent-1"><span class="comment"># Pricing & Market</span></div>
+                        <div class="code-line indent-1">net_price: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">285_000</span></div>
+                        <div class="code-line indent-1">price_growth: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">0.025</span></div>
+                        <div class="code-line indent-1">target_population: <span class="class-name">int</span> <span class="operator">=</span> <span class="number">8_500</span></div>
+                        <div class="code-line indent-1">peak_penetration: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">0.45</span></div>
+                        <div class="code-line indent-1"></div>
+                        <div class="code-line indent-1"><span class="comment"># Risk Parameters</span></div>
+                        <div class="code-line indent-1">prob_success: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">0.60</span></div>
+                        <div class="code-line indent-1">discount_rate: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">0.10</span></div>
+                        <div class="code-line indent-1"></div>
+                        <div class="code-line indent-1"><span class="comment"># Deal Terms</span></div>
+                        <div class="code-line indent-1">royalty_tier1: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">0.12</span></div>
+                        <div class="code-line indent-1">royalty_tier2: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">0.18</span></div>
+                        <div class="code-line indent-1">tier_threshold: <span class="class-name">float</span> <span class="operator">=</span> <span class="number">500_000_000</span></div>
+                        <div class="code-line"></div>
+                        <div class="code-line indent-1"><span class="keyword">def</span> <span class="function-name">calculate_revenue</span>(<span class="variable">self</span>, year: <span class="class-name">int</span>) <span class="operator">-></span> <span class="class-name">float</span>:</div>
+                        <div class="code-line indent-2"><span class="string">"""Calculate annual revenue for given year"""</span></div>
+                        <div class="code-line indent-2"><span class="keyword">if</span> year <span class="operator"><</span> <span class="variable">self</span>.launch_year:</div>
+                        <div class="code-line indent-2 indent-1"><span class="keyword">return</span> <span class="number">0.0</span></div>
+                        <div class="code-line indent-2"></div>
+                        <div class="code-line indent-2">years_since_launch <span class="operator">=</span> year <span class="operator">-</span> <span class="variable">self</span>.launch_year</div>
+                        <div class="code-line indent-2">price <span class="operator">=</span> <span class="variable">self</span>.net_price <span class="operator">*</span> (<span class="number">1</span> <span class="operator">+</span> <span class="variable">self</span>.price_growth) <span class="operator">**</span> years_since_launch</div>
+                        <div class="code-line indent-2"></div>
+                        <div class="code-line indent-2"><span class="comment"># S-curve penetration</span></div>
+                        <div class="code-line indent-2">penetration <span class="operator">=</span> <span class="variable">self</span>.<span class="function-name">_calculate_penetration</span>(years_since_launch)</div>
+                        <div class="code-line indent-2">patients <span class="operator">=</span> <span class="variable">self</span>.target_population <span class="operator">*</span> penetration</div>
+                        <div class="code-line indent-2"></div>
+                        <div class="code-line indent-2"><span class="keyword">return</span> price <span class="operator">*</span> patients</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resize-handle" data-handle="2"></div>
+
+            <!-- Model Panel -->
+            <div class="panel" style="flex: 1;" data-panel="model">
+                <div class="panel-header">
+                    <span class="panel-title">Model</span>
+                    <button class="collapse-btn" onclick="togglePanel('model')">◀</button>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-title">Revenue Forecast (2028-2040)</div>
+                    <div class="model-chart">
+                        <svg class="chart-svg" viewBox="0 0 400 200">
+                            <!-- Grid lines -->
+                            <line x1="40" y1="20" x2="40" y2="160" class="grid-line" />
+                            <line x1="40" y1="160" x2="360" y2="160" class="grid-line" />
+                            <line x1="40" y1="120" x2="360" y2="120" class="grid-line" stroke-dasharray="2,2" />
+                            <line x1="40" y1="80" x2="360" y2="80" class="grid-line" stroke-dasharray="2,2" />
+                            <line x1="40" y1="40" x2="360" y2="40" class="grid-line" stroke-dasharray="2,2" />
+                            
+                            <!-- Revenue curve (S-curve to peak, then decline) -->
+                            <polyline class="chart-line" points="60,150 90,145 120,135 150,110 180,75 210,50 240,40 270,45 300,60 330,85 360,110" />
+                            
+                            <!-- Axis labels -->
+                            <text x="50" y="175" class="axis-label">2028</text>
+                            <text x="180" y="175" class="axis-label">2034</text>
+                            <text x="340" y="175" class="axis-label">2040</text>
+                            
+                            <text x="15" y="163" class="axis-label">$0</text>
+                            <text x="10" y="123" class="axis-label">$250M</text>
+                            <text x="10" y="83" class="axis-label">$500M</text>
+                            <text x="10" y="43" class="axis-label">$750M</text>
+                            
+                            <!-- Peak marker -->
+                            <circle cx="240" cy="40" r="4" fill="#22d3ee" />
+                            <text x="250" y="35" class="axis-label" fill="#22d3ee">Peak: $1.09B</text>
+                        </svg>
+                    </div>
+                    
+                    <div class="chart-title" style="margin-top: 30px;">Key Metrics</div>
+                    <div style="margin-top: 16px; color: #a1a1aa; font-size: 11px; line-height: 2;">
+                        <div><span style="color: #71717a;">rNPV (10%):</span> <span style="color: #86efac; font-weight: 600;">$1.18B</span></div>
+                        <div><span style="color: #71717a;">IRR:</span> <span style="color: #86efac; font-weight: 600;">26.9%</span></div>
+                        <div><span style="color: #71717a;">Peak Revenue:</span> <span style="color: #86efac; font-weight: 600;">$1.09B (2036)</span></div>
+                        <div><span style="color: #71717a;">Payback Period:</span> <span style="color: #86efac; font-weight: 600;">6.2 years</span></div>
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #3e3e42;">
+                            <span style="color: #71717a;">Risk-Adjusted:</span> <span style="color: #fbbf24; font-weight: 600;">Yes (60% PoS)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Panel collapse/expand functionality
+        function togglePanel(panelName) {
+            const panel = document.querySelector(`[data-panel="${panelName}"]`);
+            const btn = panel.querySelector('.collapse-btn');
+            
+            panel.classList.toggle('collapsed');
+            btn.textContent = panel.classList.contains('collapsed') ? '▶' : '◀';
+        }
+
+        // Resize functionality
+        let isResizing = false;
+        let currentHandle = null;
+        let startX = 0;
+        let startFlexes = [];
+
+        document.querySelectorAll('.resize-handle').forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                currentHandle = handle;
+                startX = e.clientX;
+                handle.classList.add('dragging');
+
+                // Store initial flex values
+                const panels = document.querySelectorAll('.panel');
+                startFlexes = Array.from(panels).map(panel => {
+                    if (panel.classList.contains('collapsed')) return 0;
+                    return parseFloat(panel.style.flex) || 1;
+                });
+
+                e.preventDefault();
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            const handleIndex = parseInt(currentHandle.dataset.handle);
+            const panels = document.querySelectorAll('.panel');
+            const leftPanel = panels[handleIndex];
+            const rightPanel = panels[handleIndex + 1];
+
+            if (leftPanel.classList.contains('collapsed') || rightPanel.classList.contains('collapsed')) {
+                return;
+            }
+
+            const container = document.getElementById('panelsContainer');
+            const containerWidth = container.offsetWidth;
+            const deltaX = e.clientX - startX;
+            const deltaFlex = (deltaX / containerWidth) * 4; // Scale based on total flex units
+
+            const leftFlex = Math.max(0.2, startFlexes[handleIndex] + deltaFlex);
+            const rightFlex = Math.max(0.2, startFlexes[handleIndex + 1] - deltaFlex);
+
+            leftPanel.style.flex = leftFlex;
+            rightPanel.style.flex = rightFlex;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                if (currentHandle) {
+                    currentHandle.classList.remove('dragging');
+                    currentHandle = null;
+                }
+            }
+        });
+
+        // Chat input functionality
+        const chatInput = document.querySelector('.chat-input');
+        const sendBtn = document.querySelector('.chat-send-btn');
+        
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            
+            // Enable/disable send button
+            sendBtn.disabled = !this.value.trim();
+        });
+        
+        function sendMessage() {
+            if (chatInput.value.trim()) {
+                // Handle message send (placeholder)
+                console.log('Message sent:', chatInput.value);
+                chatInput.value = '';
+                chatInput.style.height = 'auto';
+                sendBtn.disabled = true;
+            }
+        }
+        
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        sendBtn.addEventListener('click', sendMessage);
+        
+        // Initialize send button state
+        sendBtn.disabled = true;
+
+        // Plan action buttons
+        function updateCode() {
+            const btn = event.target.closest('.plan-action-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⚡</span><span>Updating...</span>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span>✓</span><span>Code Updated</span>';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            }, 800);
+        }
+
+        function updateModel() {
+            const btn = event.target.closest('.plan-action-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>📊</span><span>Updating...</span>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span>✓</span><span>Model Updated</span>';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            }, 800);
+        }
+
+        // Animate chart on load
+        setTimeout(() => {
+            const chartLine = document.querySelector('.chart-line');
+            if (chartLine) {
+                chartLine.style.strokeDasharray = chartLine.getTotalLength();
+                chartLine.style.strokeDashoffset = chartLine.getTotalLength();
+                chartLine.style.animation = 'drawLine 1.5s ease forwards';
+            }
+        }, 100);
+    </script>
+</body>
+</html>

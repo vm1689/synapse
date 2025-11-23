@@ -1,0 +1,45 @@
+# Drug Valuation
+Asset-level financial model for rare disease therapeutic
+
+## Commercial Assumptions
+
+### Timeline
+
+Launch Year: 2028
+Peak Year: 2036
+LOE Year: 2040
+
+## Pricing & Market
+
+Net Price: $285,000 per patient/year [1]
+Price Growth: 2.5% annually
+Target Population: 8,500 patients (US) [2]
+Peak Penetration: 45%
+
+## Development Risk
+
+Probability of Success: 60% [3]
+Phase 3 Start: Q2 2026
+
+## Deal Economics
+
+Partner: BioPartner Inc.
+
+Royalty Structure:
+
+Tier 1: 12% (first $500M sales)
+Tier 2: 18% (above $500M sales)
+
+Development Milestones: $125M
+
+## Output Metrics
+
+rNPV (10%)
+Peak Revenue
+Annual Revenue
+
+## References
+
+[1] IQVIA Rare Disease Pricing Report 2025
+[2] GlobalData Alpha-1 Antitrypsin Market Forecast
+[3] ClinicalTrials.gov - Phase 2 Results (NCT05234567)

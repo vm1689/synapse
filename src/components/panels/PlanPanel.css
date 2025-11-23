@@ -1,0 +1,148 @@
+.plan-panel-content {
+  padding: 10px;
+}
+
+.plan-text-content {
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+}
+
+.plan-item {
+  color: #a1a1aa;
+  margin-bottom: 20px;
+  padding-left: 16px;
+  position: relative;
+}
+
+.plan-item::before {
+  content: '#';
+  position: absolute;
+  left: 0;
+  color: #52525b;
+}
+
+.plan-title {
+  color: #c084fc;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plan-detail {
+  color: #71717a;
+  margin-left: 16px;
+  margin-top: 4px;
+  font-size: var(--text-sm);
+  transition: background-color 0.5s ease; /* Smooth transition for highlight */
+}
+
+.plan-value {
+  color: #86efac;
+  font-weight: 500;
+}
+
+.plan-citation {
+  color: #3b82f6;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  margin-left: 2px;
+  text-decoration: none;
+}
+
+.plan-citation-meta {
+  color: #71717a;
+  font-size: var(--text-xxs);
+  font-style: italic;
+}
+
+.plan-context-note {
+  color: #71717a;
+  font-size: var(--text-xxs);
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.plan-citation:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.plan-citations-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #3e3e42;
+}
+
+.plan-citation-item {
+  color: #3b82f6;
+  font-size: var(--text-sm);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.plan-citation-item a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.plan-citation-item a:hover {
+  text-decoration: underline;
+}
+
+.plan-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3e3e42;
+}
+
+.plan-action-btn {
+  background: #3e3e42;
+  border: 1px solid #4e4e52;
+  border-radius: 4px;
+  color: #e4e4e7;
+  padding: 6px 12px;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.plan-action-btn:hover {
+  background: #4e4e52;
+  border-color: #5e5e62;
+}
+
+.plan-action-btn:active {
+  background: #5e5e62;
+}
+
+.plan-action-btn.primary {
+  background: #0078d4;
+  border-color: #0078d4;
+}
+
+.plan-action-btn.primary:hover {
+  background: #106ebe;
+  border-color: #106ebe;
+}
+
+.plan-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Highlight effect for referenced item */
+.highlight-ref {
+  background-color: rgba(59, 130, 246, 0.2); /* Blue with low opacity */
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-left: 12px; /* Adjust margin to account for padding */
+}

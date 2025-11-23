@@ -1,0 +1,68 @@
+.code-panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.code-content {
+  font-family: 'SF Mono', Monaco, Consolas, monospace;
+  font-size: var(--text-xs);
+  line-height: var(--line-compact);
+  flex: 1;
+  overflow: auto;
+  padding: 10px;
+}
+
+.code-block {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #e4e4e7;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.code-line {
+  margin: 2px 0;
+  white-space: pre;
+}
+
+/* Syntax Highlighting */
+.token-comment {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.token-keyword {
+  color: #c084fc;
+  font-weight: 500;
+}
+
+.token-class-name {
+  color: #67e8f9;
+}
+
+.token-function-name {
+  color: #fbbf24;
+}
+
+.token-string {
+  color: #86efac;
+}
+
+.token-number {
+  color: #fca5a5;
+}
+
+.token-operator {
+  color: #f472b6;
+}
+
+.token-builtin {
+  color: #fde047;
+}
+
+.token-decorator {
+  color: #f472b6;
+}
