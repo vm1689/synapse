@@ -1,4 +1,3 @@
-
 # Synapse
 
 **The Workspace for Drug Valuation**
@@ -6,6 +5,14 @@
 > **The Problem:** Drug valuation is paralyzed by disconnected teams using fragile, static spreadsheets that cannot keep pace with the complexity of drug development. This fragmentation traps Clinical, Commercial, and Strategy insights in opaque formulas and version control errors, leading to high-stakes decisions based on stale data.
 
 **Synapse** solves this by unifying stakeholders in a single workspace where AI agents instantly translate natural language conversations into live, executable code and market models. We are replacing "black box" spreadsheets with a transparent, real-time single source of truth for key assets.
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=ga601WNNO2g">
+    <img src="https://img.youtube.com/vi/ga601WNNO2g/maxresdefault.jpg" alt="Synapse Demo" width="700">
+  </a>
+  <br>
+  <em>▶️ Watch the Demo</em>
+</p>
 
 -----
 
@@ -114,9 +121,3 @@ src/
 -----
 
 **Built for the future of Pharma Intelligence.**
-
------
-
-### 💡 A Next Step
-
-Since this is an IDE-like interface, adding a **screenshot** or a GIF of the interface in action right below the "The Problem/Solution" section would massively increase the quality of this README. Would you like me to generate a placeholder image tag for that?
