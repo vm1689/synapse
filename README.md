@@ -7,7 +7,11 @@
 **Synapse** solves this by unifying stakeholders in a single workspace where AI agents instantly translate natural language conversations into live, executable code and market models. We are replacing "black box" spreadsheets with a transparent, real-time single source of truth for key assets.
 
 <p align="center">
-  <iframe width="700" height="394" src="https://www.youtube.com/embed/ga601WNNO2g" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <a href="https://www.youtube.com/watch?v=ga601WNNO2g" target="_blank">
+    <img src="https://img.youtube.com/vi/ga601WNNO2g/maxresdefault.jpg" alt="Synapse Demo" width="700">
+  </a>
+  <br>
+  <em>▶️ Watch the Demo</em>
 </p>
 
 -----
